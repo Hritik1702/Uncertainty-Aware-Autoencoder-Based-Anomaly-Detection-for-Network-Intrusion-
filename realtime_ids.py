@@ -1,6 +1,5 @@
-# ===============================
+
 # Imports
-# ===============================
 import csv
 from datetime import datetime
 import os
@@ -12,11 +11,7 @@ import time
 
 from tensorflow.keras.models import load_model
 from tensorflow.keras.losses import MeanSquaredError
-
-
-# ===============================
 # Load trained IDS artifacts
-# ===============================
 
 ARTIFACT_DIR = "artifacts/"
 
@@ -33,10 +28,7 @@ train_columns = joblib.load(ARTIFACT_DIR + "train_columns.pkl")
 alpha = fusion_params["alpha"]
 fusion_threshold = fusion_params["fusion_threshold"]
 
-
-# ===============================
 # MC Dropout prediction
-# ===============================
 
 def mc_dropout_predict(model, X, T=20):
     preds = []
@@ -44,10 +36,7 @@ def mc_dropout_predict(model, X, T=20):
         preds.append(model(X, training=True).numpy())
     return np.array(preds)
 
-
-# ===============================
 # Fused anomaly detection
-# ===============================
 
 def fused_anomaly_detection(X_scaled, model, alpha, fusion_threshold, T=20):
     mc_recons = mc_dropout_predict(model, X_scaled, T=T)
@@ -70,10 +59,7 @@ def fused_anomaly_detection(X_scaled, model, alpha, fusion_threshold, T=20):
 
     return final_score, alerts
 
-
-# ===============================
 # Flow → NSL-KDD feature mapping
-# ===============================
 
 def map_flow_to_nslkdd(flow_df):
     df = pd.DataFrame()
@@ -114,11 +100,7 @@ def map_flow_to_nslkdd(flow_df):
         df[f] = 0
 
     return df
-
-
-# ===============================
 # Prepare real-time features
-# ===============================
 
 def prepare_realtime_features(nsl_df, train_columns, scaler):
     df_enc = pd.get_dummies(
@@ -128,22 +110,14 @@ def prepare_realtime_features(nsl_df, train_columns, scaler):
     df_enc = df_enc.reindex(columns=train_columns, fill_value=0)
     return scaler.transform(df_enc)
 
-
-# ===============================
 # Initialize IDS output file
-# ===============================
-
 OUTPUT_FILE = "ids_output.csv"
 
 if not os.path.exists(OUTPUT_FILE):
     with open(OUTPUT_FILE, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["timestamp", "round", "flow_id", "score", "status"])
-
-
-# ===============================
 # MAIN LOOP
-# ===============================
 
 if __name__ == "__main__":
     print("Real-time IDS started (CSV demo)")
@@ -152,7 +126,7 @@ if __name__ == "__main__":
     MAX_ROUNDS = 10
 
     for round_id in range(1, MAX_ROUNDS + 1):
-        print(f"🔁 Round {round_id}/{MAX_ROUNDS}")
+        print(f"Round {round_id}/{MAX_ROUNDS}")
 
         flow_df = pd.read_csv("flow_input.csv")
 
@@ -188,3 +162,4 @@ if __name__ == "__main__":
         time.sleep(5)
 
     print("Real-time IDS finished after 10 rounds")
+
